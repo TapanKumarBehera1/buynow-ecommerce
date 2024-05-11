@@ -115,7 +115,7 @@ async function resetPasswordRequest(req, res) {
 
     // Also set token in email
     const resetPageLink =
-      "https://testing-ecom.onrender.com/reset-password?token=" + token + "&email=" + email;
+      "https://https://buynow-ecommerce.onrender.com/reset-password?token=" + token + "&email=" + email;
     const subject = "reset password for e-commerce";
     const html = `<p>Click <a href='${resetPageLink}'>here</a> to Reset Password</p>`;
 
