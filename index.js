@@ -48,11 +48,11 @@ server.use(
 //     credentials: true,
 //   })
 // );
-server.use(
-  cors({
-    exposedHeaders: ["X-Total-Count"],
-  })
-);
+// server.use(
+//   cors({
+//     exposedHeaders: ["X-Total-Count"],
+//   })
+// );
 
 server.use(express.json());
 
