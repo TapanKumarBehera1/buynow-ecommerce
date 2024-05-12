@@ -4,7 +4,7 @@ const { WalletRecord } = require("../model/walletRecordDB");
 async function fetchWalletTransactionByUser(req, res) {
   const { id } = req.user;
   try {
-    const userWalletRecord = await WalletRecord.find({ user: id });
+    const userWalletRecord = await WalletRecord.find({ user: id }).sort({ createdAt: -1 });
     if (userWalletRecord) {
       return res.status(200).json({ walletRecord:userWalletRecord });
     }
