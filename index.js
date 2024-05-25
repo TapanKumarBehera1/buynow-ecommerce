@@ -21,11 +21,7 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const databaseConnect = require("./config/database");
 const verifyToken = require("./middleware/common");
-const { Order } = require("./model/orderDB");
-const { User } = require("./model/userDB");
-const { Wallet } = require("./model/walletDB");
-const { WalletRecord } = require("./model/walletRecordDB");
-const { sendMail, invoiceTemplate } = require("./services/common");
+const webHookController = require("./webhook/webhookOperation");
 databaseConnect().catch((error) => console.log(error));
 // MongoDB database connection
 
@@ -67,70 +63,72 @@ server.use("/address", verifyToken, addressRoute);
 server.use("/orders", verifyToken, orderRoute);
 server.use("/wallet", verifyToken, walletRoute);
 server.use("/walletrecord", verifyToken, walletRecordRoute);
+server.use("/payment", verifyToken, paymentRoute);
 server.use("/auth", authRoute);
-server.use("/payment", paymentRoute);
 
-server.post("/webhook", async (req, res) => {
-  const webhookSecret = process.env.RazorPay_key_Secret;
-  const signatureHeader = req.get("X-Razorpay-Signature");
-  const payload = JSON.stringify(req.body);
-  const webHookBody = req.body;
-  try {
-    const hmac = crypto.createHmac("sha256", webhookSecret);
-    hmac.update(payload);
-    const calculatedSignature = hmac.digest("hex");
+server.post("/webhook", webHookController);
 
-    if (signatureHeader === calculatedSignature) {
-      // Signature is valid (here checking valid signature)
-      const event = req.body.event;
-      if (event === "payment.authorized") {
-        //here i used payment.authorized event to target the user's authorized payment (this is a testing purpose event)
-        const orderID = webHookBody.payload.payment.entity.notes.orderID;
-        if (orderID) {
-          const order = await Order.findById(orderID);
-          order.paymentStatus = "received";
-          await order.save();
-          const user = await User.findById(order.user);
-          sendMail({
-            to: user.email,
-            html: invoiceTemplate(order),
-            subject: "Order Received",
-          });
-          return res.status(200).send("Webhook Received");
-        } else {
-          const amountInPaisa = webHookBody.payload.payment.entity.amount;
-          const userId = webHookBody.payload.payment.entity.notes.userId;
-          let amount = amountInPaisa / 100;
-          let userWallet = await Wallet.findOne({ user: userId });
-          let currentBalance = userWallet.wallet;
-          let totalBalance = currentBalance + amount;
-          userWallet.wallet = totalBalance;
-          await userWallet.save();
-          let saveRecord = await WalletRecord.create({
-            user: userId,
-            wallet: userWallet._id,
-            purpose: "add-money",
-            amount: amount,
-          });
-          await saveRecord.save();
-          return res.status(200).json({
-            addedamount: amount,
-            message: `wallet webhook ran and amount ${amount} added to your wallet`,
-          });
-        }
-      } else {
-        console.log("Unhandled event:", event);
-        return res.status(200).send("Webhook Received But Other Event Ran");
-      }
-    } else {
-      // Invalid signature
-      res.status(400).send("Invalid Signature");
-    }
-  } catch (error) {
-    console.error("Error processing webhook:", error);
-    res.status(500).send("Error processing webhook");
-  }
-});
+// server.post("/webhook", async (req, res) => {
+//   const webhookSecret = process.env.RazorPay_key_Secret;
+//   const signatureHeader = req.get("X-Razorpay-Signature");
+//   const payload = JSON.stringify(req.body);
+//   const webHookBody = req.body;
+//   try {
+//     const hmac = crypto.createHmac("sha256", webhookSecret);
+//     hmac.update(payload);
+//     const calculatedSignature = hmac.digest("hex");
+
+//     if (signatureHeader === calculatedSignature) {
+//       // Signature is valid (here checking valid signature)
+//       const event = req.body.event;
+//       if (event === "payment.authorized") {
+//         //here i used payment.authorized event to target the user's authorized payment (this is a testing purpose event)
+//         const orderID = webHookBody.payload.payment.entity.notes.orderID;
+//         if (orderID) {
+//           const order = await Order.findById(orderID);
+//           order.paymentStatus = "received";
+//           await order.save();
+//           const user = await User.findById(order.user);
+//           sendMail({
+//             to: user.email,
+//             html: invoiceTemplate(order),
+//             subject: "Order Received",
+//           });
+//           return res.status(200).send("Webhook Received");
+//         } else {
+//           const amountInPaisa = webHookBody.payload.payment.entity.amount;
+//           const userId = webHookBody.payload.payment.entity.notes.userId;
+//           let amount = amountInPaisa / 100;
+//           let userWallet = await Wallet.findOne({ user: userId });
+//           let currentBalance = userWallet.wallet;
+//           let totalBalance = currentBalance + amount;
+//           userWallet.wallet = totalBalance;
+//           await userWallet.save();
+//           let saveRecord = await WalletRecord.create({
+//             user: userId,
+//             wallet: userWallet._id,
+//             purpose: "add-money",
+//             amount: amount,
+//           });
+//           await saveRecord.save();
+//           return res.status(200).json({
+//             addedamount: amount,
+//             message: `wallet webhook ran and amount ${amount} added to your wallet`,
+//           });
+//         }
+//       } else {
+//         console.log("Unhandled event:", event);
+//         return res.status(200).send("Webhook Received But Other Event Ran");
+//       }
+//     } else {
+//       // Invalid signature
+//       res.status(400).send("Invalid Signature");
+//     }
+//   } catch (error) {
+//     console.error("Error processing webhook:", error);
+//     res.status(500).send("Error processing webhook");
+//   }
+// });
 
 server.use("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "dist", "index.html"));
