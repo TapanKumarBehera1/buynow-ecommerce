@@ -1,3 +1,7 @@
+const {
+  uploadAtCloudinary,
+  uploadMultipleFiles,
+} = require("../config/cloudinary");
 const { Product } = require("../model/productsDB");
 
 const fetchAllProducts = async (req, res) => {
@@ -50,14 +54,38 @@ const getProductById = async (req, res) => {
   }
 };
 const createANewProduct = async (req, res) => {
-  let product = await Product({ ...req.body });
+  let {
+    title,
+    description,
+    price,
+    category,
+    brand,
+    discountPercentage,
+    stock,
+  } = req.body;
+  const thumbnailPath = req.files["thumbnail"][0].path;
+  const thumbnail = await uploadAtCloudinary(thumbnailPath);
+  const imagePaths = req.files["images"].map((file) => file.path);
+  const images = await uploadMultipleFiles(imagePaths);
   try {
+    let product = new Product({
+      title,
+      description,
+      price,
+      category,
+      brand,
+      discountPercentage,
+      stock,
+      thumbnail,
+      images,
+    });
     const doc = await product.save();
     res.status(201).json(doc);
   } catch (err) {
     res.status(400).json(err);
   }
 };
+
 const updateProduct = async (req, res) => {
   const { id } = req.params;
   try {
