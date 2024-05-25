@@ -1,9 +1,9 @@
-import { Order } from "../model/orderDB";
-import { Payment } from "../model/paymentDB";
-import { User } from "../model/userDB";
-import { Wallet } from "../model/walletDB";
-import { WalletRecord } from "../model/walletRecordDB";
-import { invoiceTemplate, sendMail } from "../services/common";
+const { Order } = require("../model/orderDB");
+const { Payment } = require("../model/paymentDB");
+const { User } = require("../model/userDB");
+const { Wallet } = require("../model/walletDB");
+const { WalletRecord } = require("../model/walletRecordDB");
+const { invoiceTemplate, sendMail } = require("../services/common");
 
 const webHookController = async (req, res) => {
   const webhookSecret = process.env.RazorPay_key_Secret;
