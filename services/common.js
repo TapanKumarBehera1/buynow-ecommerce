@@ -160,6 +160,7 @@ function invoiceTemplate(order) {
                       <th>Price</th>
                   </tr>
                   ${order.items.map((item) =>{
+                    return(
                     <tr>
                       <td>
                         <img
@@ -171,6 +172,7 @@ function invoiceTemplate(order) {
                       <td>{item.quantity}</td>
                       <td>₹{item.product.price * item.quantity}</td>
                     </tr>
+                    )
                   })}
               </table>
               <h2>Shipping Address:</h2>
