@@ -67,6 +67,8 @@ const createANewProduct = async (req, res) => {
   const thumbnail = await uploadAtCloudinary(thumbnailPath);
   const imagePaths = req.files["images"].map((file) => file.path);
   const images = await uploadMultipleFiles(imagePaths);
+  console.log(images);
+  console.log(imagePaths);
   try {
     let product = new Product({
       title,
@@ -81,6 +83,7 @@ const createANewProduct = async (req, res) => {
     });
     const doc = await product.save();
     res.status(201).json(doc);
+    console.log(doc,"86");
   } catch (err) {
     res.status(400).json(err);
   }
