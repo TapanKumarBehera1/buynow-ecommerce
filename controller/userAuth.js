@@ -101,8 +101,6 @@ async function refreshToken(req, res, next) {
 
 async function resetPasswordRequest(req, res) {
   const { email } = req.body;
-  // const userAlreadyExists = await User.findOne({ email });
-  // console.log(userAlreadyExists, "user");
   const user = await User.findOne({ email });
   if (!user) {
     return res.json({ notAnUser: "User Not Found" });
