@@ -159,21 +159,18 @@ function invoiceTemplate(order) {
                       <th>Quantity</th>
                       <th>Price</th>
                   </tr>
-                  ${order.items.map((item) =>{
-                    return(
-                    <tr>
+                  ${order.items.map((item) =>`<tr>
                       <td>
                         <img
-                          src={item.product.thumbnail}
+                          src=${item.product.thumbnail}
                           alt="Product 1"
                         />
                       </td>
-                      <td>{item.product.title}</td>
-                      <td>{item.quantity}</td>
-                      <td>₹{item.product.price * item.quantity}</td>
-                    </tr>
-                    )
-                  })}
+                      <td>${item.product.title}</td>
+                      <td>${item.quantity}</td>
+                      <td>₹${item.product.price * item.quantity}</td>
+                    </tr>`
+                  )}
               </table>
               <h2>Shipping Address:</h2>
               <table class="invoice-details">
@@ -212,3 +209,4 @@ function invoiceTemplate(order) {
 }
 
 module.exports = { sendMail, invoiceTemplate };
+
