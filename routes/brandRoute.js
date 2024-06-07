@@ -5,12 +5,13 @@ const {
   deleteBrand,
   updateBrand,
 } = require("../controller/brand");
+const verifyToken = require("../middleware/common");
 const brandRoute = express.Router();
 
 brandRoute
-  .post("/", addNewBrand)
+  .post("/", verifyToken, addNewBrand)
   .get("/", fetchAllBrands)
-  .delete("/:id", deleteBrand)
-  .patch("/:id", updateBrand);
+  .delete("/:id", verifyToken, deleteBrand)
+  .patch("/:id", verifyToken, updateBrand);
 
 module.exports = brandRoute;

@@ -7,6 +7,7 @@ const {
   updateProduct,
 } = require("../controller/products");
 const upload = require("../config/multer");
+const verifyToken = require("../middleware/common");
 
 const cpUpload = upload.fields([
   { name: "thumbnail", maxCount: 1 },
@@ -15,7 +16,7 @@ const cpUpload = upload.fields([
 
 productRoute.get("/", fetchAllProducts);
 productRoute.get("/:id", getProductById);
-productRoute.post("/", cpUpload, createANewProduct);
-productRoute.patch("/:id", updateProduct);
+productRoute.post("/", verifyToken, cpUpload, createANewProduct);
+productRoute.patch("/:id", verifyToken, updateProduct);
 
 module.exports = productRoute;

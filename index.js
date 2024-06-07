@@ -45,9 +45,9 @@ server.use(
 server.use(express.json());
 
 //server route middleware
-server.use("/products", verifyToken, productRoute);
-server.use("/category", verifyToken, categoryRoute);
-server.use("/brand", verifyToken, brandRoute);
+server.use("/products", productRoute);
+server.use("/category", categoryRoute);
+server.use("/brand", brandRoute);
 server.use("/cart", verifyToken, cartRoute);
 server.use("/wishlist", verifyToken, wishlistRoute);
 server.use("/address", verifyToken, addressRoute);
